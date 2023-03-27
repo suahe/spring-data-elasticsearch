@@ -1,7 +1,10 @@
 server:
   port: 8181
 spring:
+  data:
     elasticsearch:
-      rest:
-        uris: 127.0.0.1:9300
+      repositories:
+        enabled: true
+      cluster-nodes: 127.0.0.1:9300
+      cluster-name: elasticsearch
 

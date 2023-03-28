@@ -4,6 +4,7 @@ import com.sah.springDataElasticsearch.dao.WaterDataRecordDao;
 import com.sah.springDataElasticsearch.entiry.WaterDataRecord;
 import com.sah.springDataElasticsearch.service.WaterDataRecordService;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -63,10 +64,12 @@ public class WaterDataRecordServiceImpl implements WaterDataRecordService {
 
     @Override
     public List<WaterDataRecord> findByIndexKey(String key) {
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.matchQuery("waterIndexList.key", "EC"));
+        MatchQueryBuilder matchQuery = QueryBuilders.matchQuery("waterIndexList.key", "EC");
+        /*BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.matchQuery("waterIndexList.key", "EC"));*/
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        nativeSearchQueryBuilder.withQuery(queryBuilder);
+        nativeSearchQueryBuilder.withQuery(matchQuery);
+        //nativeSearchQueryBuilder.withQuery(queryBuilder);
         NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.build();
         SearchHits<WaterDataRecord> search = elasticsearchRestTemplate.search(nativeSearchQuery, WaterDataRecord.class);
         List<WaterDataRecord> waterDataRecordList = new ArrayList<>();

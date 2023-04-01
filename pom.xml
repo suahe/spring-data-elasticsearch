@@ -11,8 +11,8 @@
     <groupId>com.sah</groupId>
     <artifactId>spring-data-elasticsearch</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>demo</name>
-    <description>Demo project for Spring Boot</description>
+    <name>spring-data-elasticsearch</name>
+    <description>spring-data-elasticsearch</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>

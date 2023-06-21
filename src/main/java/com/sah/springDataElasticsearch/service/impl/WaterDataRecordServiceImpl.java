@@ -1,11 +1,15 @@
 package com.sah.springDataElasticsearch.service.impl;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import com.sah.springDataElasticsearch.dao.WaterDataRecordDao;
 import com.sah.springDataElasticsearch.entiry.WaterDataRecord;
 import com.sah.springDataElasticsearch.service.WaterDataRecordService;
+import org.apache.http.client.utils.DateUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -18,6 +22,7 @@ import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
@@ -25,6 +30,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author suahe
@@ -63,6 +69,26 @@ public class WaterDataRecordServiceImpl implements WaterDataRecordService {
     }
 
     @Override
+    public List<WaterDataRecord> stateEquipmentIndex(String equipmentId, String key) {
+        Date date = DateUtil.parseDateTime("2022-04-01 00:00:00");
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().must(
+                QueryBuilders.matchQuery("equipmentId", equipmentId)
+        ).must(
+                QueryBuilders.rangeQuery("saveTime").gt(date.getTime())
+        );
+        TermsAggregationBuilder equipmentIdTeamAgg = AggregationBuilders.terms("equipmentId").field("equipmentId.keyword");
+        AvgAggregationBuilder avgAgg = AggregationBuilders.avg("avg_value").field("waterIndexList.value");
+        equipmentIdTeamAgg.order(BucketOrder.aggregation("avg_value", false));
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        nativeSearchQueryBuilder.withQuery(boolQueryBuilder)
+                .addAggregation(equipmentIdTeamAgg.subAggregation(avgAgg));
+        NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.build();
+        SearchHits<WaterDataRecord> search = elasticsearchRestTemplate.search(nativeSearchQuery, WaterDataRecord.class);
+        List<WaterDataRecord> waterDataRecordList = search.get().map(SearchHit::getContent).collect(Collectors.toList());
+        return waterDataRecordList;
+    }
+
+    @Override
     public List<WaterDataRecord> findByIndexKey(String key) {
         MatchQueryBuilder matchQuery = QueryBuilders.matchQuery("waterIndexList.key", "EC");
         /*BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -72,8 +98,7 @@ public class WaterDataRecordServiceImpl implements WaterDataRecordService {
         //nativeSearchQueryBuilder.withQuery(queryBuilder);
         NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.build();
         SearchHits<WaterDataRecord> search = elasticsearchRestTemplate.search(nativeSearchQuery, WaterDataRecord.class);
-        List<WaterDataRecord> waterDataRecordList = new ArrayList<>();
-        search.get().forEach(item -> waterDataRecordList.add(item.getContent()));
+        List<WaterDataRecord> waterDataRecordList = search.get().map(SearchHit::getContent).collect(Collectors.toList());
         return waterDataRecordList;
     }
 

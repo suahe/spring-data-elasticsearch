@@ -39,6 +39,12 @@ public class WaterDataRecordController {
         return waterDataRecordService.findByIndexKey(key);
     }
 
+    @GetMapping("stateEquipmentIndex")
+    public List<WaterDataRecord> stateEquipmentIndex(@RequestParam("equipmentId") String equipmentId,
+                                                     @RequestParam("key") String key) {
+        return waterDataRecordService.stateEquipmentIndex(equipmentId, key);
+    }
+
     @GetMapping("findAggregation")
     public void findAggregation() {
         waterDataRecordService.findAggregation();

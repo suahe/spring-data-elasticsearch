@@ -3,10 +3,7 @@ package com.sah.springDataElasticsearch.entiry;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -19,7 +16,8 @@ import java.util.List;
  * @ApiNote 水质数据
  */
 @Data
-@Document(indexName = "water_data_record", shards = 1, replicas = 0)
+@Mapping(mappingPath = "waterDataRecord.json")
+@Document(indexName = "water_data_record")
 public class WaterDataRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;

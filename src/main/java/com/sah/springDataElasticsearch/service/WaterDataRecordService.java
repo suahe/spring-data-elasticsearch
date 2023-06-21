@@ -29,6 +29,8 @@ public interface WaterDataRecordService {
      */
     List<WaterDataRecord> findByEquipmentName(String equipmentName);
 
+    List<WaterDataRecord> stateEquipmentIndex(String equipmentId, String key);
+
     /**
      * 根据水质指标查询
      * @param key
